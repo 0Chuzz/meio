@@ -18,17 +18,17 @@ token_t scan(char *p)
         "0x"[0-9a-fA-F]+                {TOKRETURN(HEXNUMBER);}
         [a-zA-Z_\x80-\xff]+             {TOKRETURN(IDENTIFIER);}
         [+\-/^*=><:]+                   {TOKRETURN(OPERATOR);}
-        [\n;]                           {TOKRETURN(ENDEXPR);}
+        [\n;\000]                       {TOKRETURN(ENDEXPR);}
         [ \t\r]                         {TOKRETURN(WHITESPACE);}
         '"'([\\][^\000]|[^"\000])*'"'   {TOKRETURN(STRING);}
         "'"([\\][^\000]|[^'\000])*"'"   {TOKRETURN(STRING);}
+        ","                             {TOKRETURN(COMMA);}
         "("                             {TOKRETURN(LPAREN);}
         ")"                             {TOKRETURN(RPAREN);}
         "["                             {TOKRETURN(LBRACKET);}
         "]"                             {TOKRETURN(RBRACKET);}
         "{"                             {TOKRETURN(LCURLY);}
         "}"                             {TOKRETURN(RCURLY);}
-        "\000"                          {TOKRETURN(END);}
         [^]                             {TOKRETURN(ERROR);}
 
 */

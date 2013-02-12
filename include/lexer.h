@@ -3,15 +3,15 @@
 
 typedef struct token{
     enum {
-        END,
         ERROR,
-        WHITESPACE,
         ENDEXPR,
+        WHITESPACE,
         NUMBER,
         HEXNUMBER,
         STRING,
         OPERATOR,
         IDENTIFIER,
+        COMMA,
         LPAREN,
         RPAREN,
         LBRACKET,
@@ -23,15 +23,15 @@ typedef struct token{
 } token_t;
 
 static const char *token_as_str[] = {
-    "END",
     "ERROR",
-    "WHITESPACE",
     "ENDEXPR",
+    "WHITESPACE",
     "NUMBER",
     "HEXNUMBER",
     "STRING",
     "OPERATOR",
     "IDENTIFIER",
+    "COMMA",
     "LPAREN",
     "RPAREN",
     "LBRACKET",
