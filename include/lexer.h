@@ -1,3 +1,5 @@
+#ifndef __LEXER_H
+#define __LEXER_H
 
 typedef struct token{
     enum {
@@ -39,3 +41,4 @@ static const char *token_as_str[] = {
 };
 
 token_t scan(char *p);
+#endif
