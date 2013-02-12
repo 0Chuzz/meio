@@ -6,7 +6,7 @@ CLEAN << "build"
 
 CFLAGS = "-g0 -O3 -Os -Iinclude/"
 CC = "gcc"
-RE2CFLAGS = "-s"
+RE2CFLAGS = "-g"
 
 rule ".o" => ".c" do |t|
     sh "re2c #{RE2CFLAGS} #{t.source} | #{CC} #{CFLAGS} -c -o #{t.name} -xc -"
