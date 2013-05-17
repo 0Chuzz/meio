@@ -11,7 +11,7 @@ int main(int argn, char *argv[]){
         cur = argv[i];
         do {
             token = scan(cur);
-            printf("%s %d\n", token_as_str[token.type], token.size);
+            printf("%s %d\n", TOKEN_ASSTRING(token), token.size);
             cur += token.size;
         } while (token.type != ERROR && token.type != END);
     }

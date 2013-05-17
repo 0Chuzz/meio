@@ -1,9 +1,10 @@
 #ifndef __LEXER_H
 #define __LEXER_H
 
-typedef struct token{
+typedef struct _token{
     enum {
         ERROR,
+        END,
         ENDEXPR,
         WHITESPACE,
         NUMBER,
@@ -19,11 +20,13 @@ typedef struct token{
         LCURLY,
         RCURLY
     } type;
+    char *symbol;
     unsigned int size;
 } token_t;
 
-static const char *token_as_str[] = {
+static const char *_token_names[] = {
     "ERROR",
+    "END",
     "ENDEXPR",
     "WHITESPACE",
     "NUMBER",
@@ -39,6 +42,7 @@ static const char *token_as_str[] = {
     "LCURLY",
     "RCURLY"
 };
+#define TOKEN_ASSTRING(token) _token_names[token.type]
 
 token_t scan(char *p);
 #endif

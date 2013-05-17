@@ -1,6 +1,7 @@
 #include"lexer.h"
 
-#define TOKRETURN(T) return ((token_t){.type=(T), .size=(p-start)})
+#define TOKRETURN(T) return ((token_t){.type=(T), .size=(p-start), \
+        .symbol=start})
 
 
 token_t scan(char *p)
@@ -17,11 +18,10 @@ token_t scan(char *p)
         [0-9]+                          {TOKRETURN(NUMBER);}
         "0x"[0-9a-fA-F]+                {TOKRETURN(HEXNUMBER);}
         [a-zA-Z_\x80-\xff]+             {TOKRETURN(IDENTIFIER);}
-        [+\-/^*=><:]+                   {TOKRETURN(OPERATOR);}
-        [\n;\000]                       {TOKRETURN(ENDEXPR);}
+        [+\-/^*=><:']+                   {TOKRETURN(OPERATOR);}
+        [\n;]                       {TOKRETURN(ENDEXPR);}
         [ \t\r]                         {TOKRETURN(WHITESPACE);}
         '"'([\\][^\000]|[^"\000])*'"'   {TOKRETURN(STRING);}
-        "'"([\\][^\000]|[^'\000])*"'"   {TOKRETURN(STRING);}
         ","                             {TOKRETURN(COMMA);}
         "("                             {TOKRETURN(LPAREN);}
         ")"                             {TOKRETURN(RPAREN);}
@@ -29,6 +29,7 @@ token_t scan(char *p)
         "]"                             {TOKRETURN(RBRACKET);}
         "{"                             {TOKRETURN(LCURLY);}
         "}"                             {TOKRETURN(RCURLY);}
+        [\000]                          {TOKRETURN(END);}
         [^]                             {TOKRETURN(ERROR);}
 
 */
