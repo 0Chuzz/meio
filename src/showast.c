@@ -34,7 +34,7 @@ void show_arguments(FILE *stream, iomessage_arguments_t arglist){
 }
 
 void show_suite(FILE *stream, iomessage_suite_t suite){
-    show_message(stream, suite->chain);
+    if (suite->chain) show_message(stream, suite->chain);
     if (suite->next){
         fputc(';', stream);
         show_suite(stream, suite->next);

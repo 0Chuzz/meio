@@ -30,10 +30,10 @@ static iomessage_suite_t new_suite(){
     return ret;
 }
 
-static iomessage_arguments_t new_arg_list(){
+static iomessage_arguments_t new_arg_list(iomessage_suite_t arg){
     iomessage_arguments_t arglist = malloc(sizeof *arglist);
     arglist->next = NULL;
-    arglist->argument = NULL;
+    arglist->argument = arg;
     return arglist;
 }
 
@@ -61,7 +61,9 @@ static int push_message(ioparser_state_t p_state, iomessage_t message){
 }
 
 static int push_suite(ioparser_state_t p_state){
-    p_state->stack->curr_suite = new_suite();
+    iomessage_suite_t nsuite = new_suite();
+    p_state->stack->curr_suite->next = nsuite;
+    p_state->stack->curr_suite = nsuite;
     p_state->stack->curr_msg = NULL;
     return 0;
 }
@@ -70,24 +72,22 @@ static void push_new_arguments(ioparser_state_t p_state, token_t tok){
     if(p_state->stack->curr_msg == NULL){
         push_message(p_state, make_symbol(""));
     }
-    iomessage_arguments_t arglist = new_arg_list();
+    iomessage_arguments_t arglist = new_arg_list(new_suite());
     p_state->stack->curr_msg->arguments = arglist;
     push_stack_frame(p_state);
     p_state->stack->type = token2parens(tok);
     p_state->stack->curr_arg = arglist;
     p_state->stack->curr_msg = NULL;
-    p_state->stack->curr_suite = new_suite();
+    p_state->stack->curr_suite = arglist->argument;
 }
 
 static int push_next_argument(ioparser_state_t p_state){
     if(p_state->stack->type == BASE) return 1;
-    iomessage_arguments_t arglist = new_arg_list();
+    iomessage_arguments_t arglist = new_arg_list(new_suite());
     p_state->stack->curr_arg->next = arglist;
-    p_state->stack->curr_arg->argument = 
-        p_state->stack->curr_suite;
     p_state->stack->curr_arg = arglist;
     p_state->stack->curr_msg = NULL;
-    p_state->stack->curr_suite = new_suite();
+    p_state->stack->curr_suite = arglist->argument;
     return 0;
 }
 
