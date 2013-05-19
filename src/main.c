@@ -3,6 +3,7 @@
 
 #include "lexer.h"
 #include "parser.h"
+#include "showast.h"
 
 int main(int argn, char *argv[]){
     int i;
@@ -18,6 +19,7 @@ int main(int argn, char *argv[]){
             parse_token(pstate, &token);
         } while (token.type != ERROR && token.type != END);
     }
+    show_ast(stdout, pstate);
     return 0;
 }
 
