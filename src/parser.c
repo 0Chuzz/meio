@@ -93,7 +93,6 @@ static int push_next_argument(ioparser_state_t p_state){
 
 static int pop_arguments(ioparser_state_t p_state, token_t tok){
     if(p_state->stack->type != token2parens(tok)) return 1;
-    push_next_argument(p_state);
     struct _argstack *prev = p_state->stack->previous;
     free(p_state->stack);
     p_state->stack = prev;
@@ -107,6 +106,7 @@ ioparser_state_t init_parser(){
     p_state->stack->type = BASE;
     p_state->stack->curr_arg = NULL;
     p_state->stack->curr_suite = new_suite();
+    p_state->parsed_code = p_state->stack->curr_suite;
     p_state->stack->curr_msg = NULL;
     return p_state;
 }

@@ -42,5 +42,5 @@ void show_suite(FILE *stream, iomessage_suite_t suite){
 }
 
 void show_ast(FILE *stream, ioparser_state_t parser){
-    show_suite(stream, parser->stack->curr_suite);
+    show_suite(stream, parser->parsed_code);
 }

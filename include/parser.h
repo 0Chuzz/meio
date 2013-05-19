@@ -45,6 +45,7 @@ typedef struct _ioparser_state{
         iomessage_arguments_t curr_arg;
         struct _argstack *previous;
     } *stack;
+    iomessage_suite_t parsed_code;
 } *ioparser_state_t;
 
 ioparser_state_t init_parser();
