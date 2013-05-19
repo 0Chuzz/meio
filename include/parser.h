@@ -7,8 +7,8 @@ typedef struct _iomessage_arguments *iomessage_arguments_t;
 
 typedef struct _iomessage{
     enum {
-        STRING,
-        INTEGER,
+        CONSTSTR,
+        CONSTINT,
         SYMBOL,
     } type;
     union {
@@ -47,5 +47,6 @@ typedef struct _ioparser_state{
     } *stack;
 } *ioparser_state_t;
 
-int parse_token(ioparser_state_t*, token_t);
+ioparser_state_t init_parser();
+int parse_token(ioparser_state_t, token_t *);
 #endif

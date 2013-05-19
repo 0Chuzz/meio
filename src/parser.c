@@ -1,7 +1,6 @@
 #include <stdlib.h>
+#include <string.h>
 #include "parser.h"
-
-static __thread ioparser_state_t *p_state;
 
 static enum typeofparens token2parens(token_t tok){
     switch(tok.type){
@@ -17,29 +16,41 @@ static enum typeofparens token2parens(token_t tok){
     }
     return BASE;
 }
-
-static iomessage_t make_message(token_t tok){
-    iomessage_t ret = malloc(sizeof *iomessage_t);
+static iomessage_t new_message(){
+    iomessage_t ret = malloc(sizeof *ret);
     ret->next = NULL;
     ret->arguments = NULL;
-    switch(tok.type){
-        case STRING:
-            char *str = malloc(tok->len);
-            memcpy(str, tok->str, tok->len);
-            str[tok->len] = 0;
-            ret->value.str = str;
-            ret->type = STRING;
-            break;
-        case HEXNUMBER:
-        case NUMBER:
-            ret->value.integer = 123;
-            ret->type = INTEGER;
-            break;
-    }
     return ret;
 }
 
-static int push_message(iomessage_t message){
+static iomessage_suite_t new_suite(){
+    iomessage_suite_t ret = malloc(sizeof *ret);
+    ret->next = NULL;
+    ret->chain = NULL;
+    return ret;
+}
+
+static iomessage_arguments_t new_arg_list(){
+    iomessage_arguments_t arglist = malloc(sizeof *arglist);
+    arglist->next = NULL;
+    arglist->argument = NULL;
+    return arglist;
+}
+
+static iomessage_t make_symbol(char * name){
+    iomessage_t ret = new_message();
+    ret->type = SYMBOL;
+    ret->value.symbol= name;
+    return ret;
+}
+
+static void push_stack_frame(ioparser_state_t p_state){
+    struct _argstack *newframe = malloc(sizeof *newframe);
+    newframe->previous = p_state->stack;
+    p_state->stack = newframe;
+}
+
+static int push_message(ioparser_state_t p_state, iomessage_t message){
     if(p_state->stack->curr_suite->chain == NULL){
         p_state->stack->curr_suite->chain = message;
     } else {
@@ -49,40 +60,26 @@ static int push_message(iomessage_t message){
     return 0;
 }
 
-static iomessage_suite_t new_suite(){
-    iomessage_suite_t ret = malloc(sizeof *iomessage_suite_t);
-    ret->next = NULL;
-    ret->chain = NULL;
-    return ret;
-}
-
-static int push_suite(){
+static int push_suite(ioparser_state_t p_state){
     p_state->stack->curr_suite = new_suite();
     p_state->stack->curr_msg = NULL;
     return 0;
 }
 
-static iomessage_arguments_t new_arg_list(){
-    iomessage_arguments_t arglist = malloc(sizeof *iomessage_arguments_t);
-    arglist->next = NULL;
-    arglist->argument = NULL;
-    return arglist;
-}
-
-static void push_new_arguments(token_t tok){
+static void push_new_arguments(ioparser_state_t p_state, token_t tok){
     if(p_state->stack->curr_msg == NULL){
-        push_message(make_emptymessage())
+        push_message(p_state, make_symbol(""));
     }
     iomessage_arguments_t arglist = new_arg_list();
     p_state->stack->curr_msg->arguments = arglist;
-    push_prev_state(p_state);
+    push_stack_frame(p_state);
     p_state->stack->type = token2parens(tok);
     p_state->stack->curr_arg = arglist;
     p_state->stack->curr_msg = NULL;
     p_state->stack->curr_suite = new_suite();
 }
 
-static int push_next_argument(){
+static int push_next_argument(ioparser_state_t p_state){
     if(p_state->stack->type == BASE) return 1;
     iomessage_arguments_t arglist = new_arg_list();
     p_state->stack->curr_arg->next = arglist;
@@ -94,47 +91,72 @@ static int push_next_argument(){
     return 0;
 }
 
-static int pop_arguments(token_t tok){
+static int pop_arguments(ioparser_state_t p_state, token_t tok){
     if(p_state->stack->type != token2parens(tok)) return 1;
-    push_next_argument();
+    push_next_argument(p_state);
     struct _argstack *prev = p_state->stack->previous;
     free(p_state->stack);
     p_state->stack = prev;
     return 0;
 }
 
-int parse_token( token_t *currtoken){
-    iomessage_t *message = NULL;
+ioparser_state_t init_parser(){
+    ioparser_state_t p_state = malloc(sizeof *p_state);
+    p_state->stack = NULL;
+    push_stack_frame(p_state);
+    p_state->stack->type = BASE;
+    p_state->stack->curr_arg = NULL;
+    p_state->stack->curr_suite = new_suite();
+    p_state->stack->curr_msg = NULL;
+    return p_state;
+}
+
+
+int parse_token(ioparser_state_t p_state, token_t *pcurrtoken){
     char *mname = NULL;
+    token_t currtoken = *pcurrtoken;
+    iomessage_t msg = NULL;
     int eom = 0;
-    switch(currtoken->type) {
+    switch(currtoken.type) {
         case WHITESPACE:
             return 0;
         case NUMBER:
         case HEXNUMBER:
+            msg = new_message();
+            msg->type = CONSTINT;
+            msg->value.integer = 123; //XXX
+            return push_message(p_state, msg);
         case STRING:
+            msg = new_message();
+            msg->type = CONSTSTR;
+            msg->value.string = "asdasd"; //XXX
+            return push_message(p_state, msg);
         case OPERATOR:
         case IDENTIFIER:
-            return push_message(make_message(currtoken));
+            mname = strndup(currtoken.symbol, currtoken.size);
+            msg = make_symbol(mname);
+            msg->type = SYMBOL;
+            msg->value.symbol = mname;
+            return push_message(p_state, msg);
         case LBRACKET:
+            msg = make_symbol("bracket");
         case LCURLY:
-            if(push_message(make_message(currtoken))) return 1;
+            if(msg == NULL) msg = make_symbol("curly");
+            if(push_message(p_state, msg)) return 1;
         case LPAREN:
-            push_new_arguments(currtoken);
+            push_new_arguments(p_state, currtoken);
             return 0;
         case COMMA:
-            return push_next_argument();
+            return push_next_argument(p_state);
         case RPAREN:
         case RCURLY:
         case RBRACKET:
-            return pop_arguments(currtoken);
+            return pop_arguments(p_state, currtoken);
         case ENDEXPR:
-            return push_suite();
+            return push_suite(p_state);
         case END:
-            error_if_parentheses_open();
             return 1;
         case ERROR:
-            error_lexer(currtoken);
             break;
     }
     return -1;

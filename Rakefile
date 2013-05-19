@@ -5,11 +5,12 @@ CLEAN.include OBJECTS
 CLEAN << "build"
 
 CFLAGS = "-g0 -O3 -Os -Iinclude/"
+DEBUG_CFLAGS = "-ggdb -O0 -Iinclude/"
 CC = "gcc"
 RE2CFLAGS = "-g"
 
 rule ".o" => ".c" do |t|
-    sh "re2c #{RE2CFLAGS} #{t.source} | #{CC} #{CFLAGS} -c -o #{t.name} -xc -"
+    sh "re2c #{RE2CFLAGS} #{t.source} | #{CC} #{DEBUG_CFLAGS} -c -o #{t.name} -xc -"
 end
 
 task :objects => OBJECTS
