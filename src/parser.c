@@ -69,7 +69,8 @@ static int push_suite(ioparser_state_t p_state){
 }
 
 static void push_new_arguments(ioparser_state_t p_state, token_t tok){
-    if(p_state->stack->curr_msg == NULL){
+    if(p_state->stack->curr_msg == NULL || 
+            p_state->stack->curr_msg->arguments != NULL){
         push_message(p_state, make_symbol(""));
     }
     iomessage_arguments_t arglist = new_arg_list(new_suite());
