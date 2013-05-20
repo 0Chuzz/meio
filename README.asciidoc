@@ -1,5 +1,12 @@
-Meio - yet another Io implementation
-====================================
+Meio
+====
 :author: Chuzz
+
+= Meio - yet another Io implementation
+
+Meio is a dialect of the Io language.
+
+Contents
+--------
 
 nothing to see here yet
