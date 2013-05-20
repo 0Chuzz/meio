@@ -27,10 +27,23 @@ ioslot_t find_attribute(ioobject_t ofobj, char *name){
     return ret;
 }
 
+
+ioslot_t new_string(char *string){
+    ioslot_t ret = new_primitive_data(STRING_OBJ, strlen(string));
+    strcpy(ret->content.data->data, string);
+    return ret;
+}
+
+ioslot_t new_integer(int integer){
+    ioslot_t ret = new_primitive_data(INT_OBJ, sizeof integer);
+    int *writeto = (int *) (ret->content.data->data);
+    *writeto = integer;
+    return ret;
+}
+
 ioslot_t send_message(ioslot_t self, iomessage_t msg){
     ioslot_t target = NULL;
     ioobject_t findin = NULL;
-    /* TODO
 
     if (msg->type == CONSTSTR){
         return new_string(msg->value.string);
@@ -40,7 +53,7 @@ ioslot_t send_message(ioslot_t self, iomessage_t msg){
 
     if (self->type == CODE) {
         return call_primitive(self->content.code, msg->arguments);
-    } */
+    } 
     if (self->type == OBJECT) {
         findin = self->content.object;
     } else {
