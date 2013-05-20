@@ -1,5 +1,6 @@
 #ifndef __OBJECTS_H
 #define __OBJECTS_H
+#include "parser.h"
 
 typedef struct _ioobject *ioobject_t;
 typedef struct _ioslot *ioslot_t;
@@ -17,18 +18,9 @@ typedef struct _ioobject {
     iohashmap_t slots;
 } *ioobject_t;
 
-typedef struct _ioprimitive_arglist {
-    enum argtype {
-        BYVAL,
-        BYPTR
-    } type;
-    ioprimitive_arglist_t next;
-} *ioprimitive_arglist_t;
-
 typedef struct _ioprimitive_code {
     ioobject_t proto;
-    void (*function) ();
-    ioprimitive_arglist_t arguments;
+    ioslot_t (*function) (ioslot_t, iomessage_t);
 } *ioprimitive_code_t;
 
 typedef struct _ioprimitive_data{

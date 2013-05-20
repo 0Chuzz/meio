@@ -1,5 +1,5 @@
 #include <stdlib.h>
-#include "parser.h"
+#include <string.h>
 #include "objects.h"
 
 ioobject_t new_object(ioobject_t proto){
@@ -27,6 +27,12 @@ ioslot_t find_attribute(ioobject_t ofobj, char *name){
     return ret;
 }
 
+ioslot_t new_primitive_data(ioobject_t proto, size_t size){
+    ioprimitive_data_t ret = malloc((sizeof *ret) + size);
+    ret->proto = proto;
+    return ret;
+}
+
 
 ioslot_t new_string(char *string){
     ioslot_t ret = new_primitive_data(STRING_OBJ, strlen(string));
@@ -41,6 +47,33 @@ ioslot_t new_integer(int integer){
     return ret;
 }
 
+ioslot_t call_primitive(ioprimitive_code_t code, 
+        ioslot_t slot, iomessage_t msg){
+    return code->function(slot, msg);
+}
+
+ioslot_t activate_slot(ioslot_t target, ioslot_t owner, iomessage_t msg){
+    ioslot_t activator = NULL;
+    if (target->type == CODE) {
+        return call_primitive(target->content.code, owner, msg);
+    } 
+    if (target->type != OBJECT){
+        target = target->content.data->proto;
+    }
+    //XXX probably won't work like this
+    activator = find_attribute(target, "activate");
+    if (!activator) return target;
+    else {
+        iomessage_t activmsg = new_message();
+        activmsg->name = "activate";
+        activmsg->type = SYMBOL;
+        activmsg->arguments= new_arg_list();
+        activmsg->arguments->argument = msg;
+
+        return send_message(target, activmsg);
+    }
+}
+
 ioslot_t send_message(ioslot_t self, iomessage_t msg){
     ioslot_t target = NULL;
     ioobject_t findin = NULL;
@@ -51,9 +84,6 @@ ioslot_t send_message(ioslot_t self, iomessage_t msg){
         return new_integer(msg->value.integer);
     } 
 
-    if (self->type == CODE) {
-        return call_primitive(self->content.code, msg->arguments);
-    } 
     if (self->type == OBJECT) {
         findin = self->content.object;
     } else {
@@ -63,5 +93,5 @@ ioslot_t send_message(ioslot_t self, iomessage_t msg){
     if(!target){
         target = find_attribute(findin, "not_found");
     }
-    return NULL; // activate_slot(target, self, msg);
+    return activate_slot(target, self, msg);
 }
