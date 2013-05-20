@@ -9,8 +9,8 @@ typedef struct _iohashmap *iohashmap_t;
 typedef struct _iohashmap { //XXX
     char *key;
     ioslot_t value;
-    io_hashmap_t next;
-} *io_hashmap_t;
+    iohashmap_t next;
+} *iohashmap_t;
 
 typedef struct _ioobject {
     ioobject_t proto;
