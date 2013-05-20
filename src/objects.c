@@ -62,15 +62,19 @@ ioslot_t activate_slot(ioslot_t target, ioslot_t owner, iomessage_t msg){
     }
     //XXX probably won't work like this
     activator = find_attribute(target, "activate");
-    if (!activator) return target;
+    if (!activator || target->activate_norecursion) return target;
     else {
+        ioslot_t ret = NULL;
+        target->activate_norecursion = 1;
         iomessage_t activmsg = new_message();
         activmsg->name = "activate";
         activmsg->type = SYMBOL;
         activmsg->arguments= new_arg_list();
         activmsg->arguments->argument = msg;
 
-        return send_message(target, activmsg);
+        ret =  send_message(target, activmsg);
+        target->activate_norecursion = 0;
+        return ret;
     }
 }
 

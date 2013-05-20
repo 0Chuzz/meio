@@ -16,7 +16,7 @@ static enum typeofparens token2parens(token_t tok){
     }
     return BASE;
 }
-static iomessage_t new_message(){
+iomessage_t new_message(){
     iomessage_t ret = malloc(sizeof *ret);
     ret->next = NULL;
     ret->arguments = NULL;
@@ -30,7 +30,7 @@ static iomessage_suite_t new_suite(){
     return ret;
 }
 
-static iomessage_arguments_t new_arg_list(iomessage_suite_t arg){
+iomessage_arguments_t new_arg_list(iomessage_suite_t arg){
     iomessage_arguments_t arglist = malloc(sizeof *arglist);
     arglist->next = NULL;
     arglist->argument = arg;

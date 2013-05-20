@@ -23,23 +23,37 @@ typedef struct _ioprimitive_code {
     ioslot_t (*function) (ioslot_t, iomessage_t);
 } *ioprimitive_code_t;
 
-typedef struct _ioprimitive_data{
+typedef struct _ioprimitive_buffer{
     ioobject_t proto;
     unsigned int length;
     char data[];
-} *ioprimitive_data_t;
+} *ioprimitive_buffer_t;
+
+typedef struct _ioprimitive_long{
+    ioobject_t proto;
+    long value;
+} *ioprimitive_long_t;
+
+typedef struct _ioprimitive_ptr{
+    ioobject_t proto;
+    void *value;
+} *ioprimitive_ptr_t;
 
 typedef struct _ioslot {
     enum ioslot_type {
         OBJECT,
-        CODE,
-        DATA
+        CFUNC,
+        BUFFER,
+        WORD,
+        POINTER
     } type;
     union {
         ioobject_t object;
-        ioprimitive_code_t code;
-        ioprimitive_data_t data;
+        ioprimitive_code_t cfunc;
+        ioprimitive_long_t buffer;
+        ioprimitive_ptr_t word;
     } content;
+    int activate_norecursion;
 } *ioslot_t;
 
 #endif
