@@ -112,6 +112,17 @@ ioparser_state_t init_parser(){
     return p_state;
 }
 
+static char * unquote_string(char *str, int size){
+    char *ret;
+    int i;
+    size -= 2;
+    ret = strndup(str+1, size);
+    for(i = 0; i < size; i++)
+       if (ret[i] == '\\'){
+           memmove(ret + i, ret + i + 1, --size - i);
+       }
+    return ret;
+}
 
 int parse_token(ioparser_state_t p_state, token_t *pcurrtoken){
     char *mname = NULL;
@@ -125,12 +136,15 @@ int parse_token(ioparser_state_t p_state, token_t *pcurrtoken){
         case HEXNUMBER:
             msg = new_message();
             msg->type = CONSTINT;
-            msg->value.integer = 123; //XXX
+            mname = strndup(currtoken.symbol, currtoken.size);
+            msg->value.integer = atoi(mname);
+            free(mname); 
             return push_message(p_state, msg);
         case STRING:
             msg = new_message();
             msg->type = CONSTSTR;
-            msg->value.string = "asdasd"; //XXX
+            mname = unquote_string(currtoken.symbol, currtoken.size);
+            msg->value.string = mname; //XXX
             return push_message(p_state, msg);
         case OPERATOR:
         case IDENTIFIER:
